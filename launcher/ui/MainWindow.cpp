@@ -874,23 +874,15 @@ void MainWindow::finalizeInstance(InstancePtr inst)
 {
     view->updateGeometries();
     setSelectedInstanceById(inst->id());
-    if (APPLICATION->accounts()->anyAccountIsValid()) {
-        ProgressDialog loadDialog(this);
-        auto update = inst->createUpdateTask(Net::Mode::Online);
-        connect(update.get(), &Task::failed, [this](QString reason) {
-            QString error = QString("Instance load failed: %1").arg(reason);
-            CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();
-        });
-        if (update) {
-            loadDialog.setSkipButton(true, tr("Abort"));
-            loadDialog.execWithTask(update.get());
-        }
-    } else {
-        CustomMessageBox::selectable(this, tr("Error"),
-                                     tr("The launcher cannot download Minecraft or update instances unless you have at least "
-                                        "one account added.\nPlease add a Microsoft account."),
-                                     QMessageBox::Warning)
-            ->show();
+    ProgressDialog loadDialog(this);
+    auto update = inst->createUpdateTask(Net::Mode::Online);
+    connect(update.get(), &Task::failed, [this](QString reason) {
+        QString error = QString("Instance load failed: %1").arg(reason);
+        CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();
+    });
+    if (update) {
+        loadDialog.setSkipButton(true, tr("Abort"));
+        loadDialog.execWithTask(update.get());
     }
 }
 
